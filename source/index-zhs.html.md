@@ -1543,7 +1543,7 @@ OPEN | the order is waiting for feeding price
 DONE | the order has been carried out
 TERMINATE | the order has been cancelled
 
-### 获取价格
+### 报价
 
 ```shell
 $ go run cmd/ctl/main.go "appkey" "appsecret" "OTCFeedPrice" "8yxkewovldjmmqj2m0n9pz71" "7739.90" "0320042810120495" 1588151193
@@ -1557,7 +1557,7 @@ data:
 }
 ```
 
-**总结:** 获取价格
+**总结:** 报价
 
 #### HTTP请求 
 `POST /api/v1/otc/orders/{orderID}/price` 
@@ -2410,6 +2410,206 @@ fee| string |  fee amount
 remark| string |  record remark
 createdAt| number |  unix timestamp, seconds
 
+# 业务 API
+业务 API 仅对业务合作方开放。API 权限通过 [ECC signature](#ecc) 认证，合作方生成密钥，然后将公钥配置到系统里方可使用；用户数据权限通过用户授权合作方后获得的 token 验证。
+
+## 公共参数
+对于 GET 请求：
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| X-BUSINESS-KEY | header | 业务合作方 key，用于标识业务合作方 | Yes | string |
+| sigR | query | ECC signature 参数，生成方法见[ECC signature](#ecc) | Yes | string |
+| sigS | query | ECC signature 参数，生成方法见[ECC signature](#ecc) | Yes | string |
+| timestamp | query | timestamp，ECC signature 参数，生成方法见[ECC signature](#ecc) | Yes | number |
+
+对于 POST/PUT 请求：
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| X-BUSINESS-KEY | header | 业务合作方 key，用于标识业务合作方 | Yes | string |
+| sig | body | ECC signature 参数，生成方法见[ECC signature](#ecc) | Yes | object |
+| timestamp | body | timestamp，结合sig验证 | Yes | number |
+
+sig:
+
+值 | 类型 |
+--------- | ------- |
+r | string |
+s | string |
+
+
+## 用户
+### 更新 token
+**描述:** 用户授权合作方后跳转至合作方页面，合作方会从 url 获得 token ，用来在其他接口中标识用户，出于安全原因 token 仅在短时间内有效（不超过2小时），过期后需要通过此接口更新；也可在需要旧 token 失效时调用此接口，获取到新 token 后旧 token 失效，不可再调用此接口；注意旧的 token 如果已过期调此接口时还需要传入用户的 Google 二次验证码 otpCode ，若 token 遗失需要用户重新授权
+
+#### HTTP请求 
+`PUT /api/v1/business/client/token`
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| token | body | 旧的 token | Yes | string |
+| ttl | body | 新 token 的有效期（秒） | Yes | number |
+| otpCode | body | 用户的 Google Authentication Code | 旧的 token 过期时必需 | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+token | string | 新的 token
+exipredAt | number | token 过期时间
+
+### 获取用户的基本信息
+**描述:** 获取用户的基本信息
+
+#### HTTP请求 
+`GET /api/v1/business/client` 
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userToken | query | 用于验证用户身份 | Yes | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the user id
+name | string | the user name
+
+## 钱包
+### 获取用户钱包余额
+**描述:** 获取所有资产余额
+
+#### HTTP请求 
+`GET /api/v1/business/wallet/balances` 
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userToken | query | 用于验证用户身份 | Yes | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+balances | array | the wallet balance list
+
+balance:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+assetID | number | the asset id
+assetName | string | the asset name
+total | string | the asset total balance
+available | string | the asset available balance
+
+### 锁定用户钱包金额
+**描述:** 锁定特定币种的金额，锁定的部分将从余额的 available 中移除
+
+#### HTTP请求 
+`PUT /api/v1/business/balance/lock`
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userToken | body | 用于验证用户身份 | Yes | string |
+| assetID | body | asset id | Yes | number |
+| amount | body | lock amount | Yes | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+total | string | the asset total balance
+available | string | the asset available balance
+
+### 解锁用户钱包金额
+**描述:** 解锁特定币种的金额，解锁的部分将回到余额的 available 中
+
+#### HTTP请求 
+`PUT /api/v1/business/balance/lock`
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userToken | body | 用于验证用户身份 | Yes | string |
+| assetID | body | asset id | Yes | number |
+| amount | body | unlock amount | Yes | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+total | string | the asset total balance
+available | string | the asset available balance
+
+### 交换币种
+**描述:** 在用户钱包间交换币种，将一个币种从源钱包余额的 locked 划转到目标钱包余额的 available，同时将另一个币种从目标钱包余额的 locked 划转到源钱包余额的 available，交换成功后会在源钱包和目标钱包都生成一笔转出订单和一笔转入订单
+
+#### HTTP请求 
+`POST /api/v1/business/swap`
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| sequence | body | 此次交换的唯一标识，防止重复请求 | Yes | string |
+| from | body | from user token | Yes | string |
+| fromAssetID | body | from asset id | Yes | number |
+| fromAmount | body | from asset amount | Yes | string |
+| to | body | to user token | Yes | string |
+| toAssetID | body | to asset id | Yes | number |
+| toAmount | body | to asset amount | Yes | string |
+| note | body | note | No | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the swap id
+
+### 获取用户钱包订单列表
+**描述:** 获取订单列表
+
+#### HTTP请求 
+`GET /api/v1/business/orders` 
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userToken | query | 用于验证用户身份 | Yes | string |
+| page | query | page, 默认1 | No | number |
+| amount | query | item count on this page, 默认10 | No | number |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+orders | array | the wallet order list
+totalCount | number | order total count
+
+orders:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the order id
+assetID | number | the asset id
+assetName | string | the asset name
+type | string | the order type, TRANSFER_IN/TRANSFER_OUT
+bizType | string | the order bizType, SWAP
+bizID | number | the order business ID, e.g. swap id for the SWAP order
+amount | string | the order amount
+status | string | status, DONE
+createdAt | number | timestamp, create time
+
 # 回调
 
 ## 订单
@@ -2556,8 +2756,99 @@ plaintext = _unpad(decipher.decrypt(base64.b64decode(base64EncryptedAppSecret)))
 print(plaintext)
 ```
 
-# 更新日志
+# ECC 签名
+>  Javascript code of building the message to be signed:
 
-发布时间 | API | 新建 / 更新 | 描述
--------------- | -------------- | -------------- | --------------
-2020-09-04 14:00 | - | - | update the documentation
+```js
+function _buildMsg (obj, opts = {}) {
+  let sortRule = opts.sort || 'key-alphabet'
+  let arr = []
+  if (_.isArray(obj)) {
+    arr = obj.map((o, i) => ({
+      k: (sortRule === 'kvpair' || sortRule === 'value') ? '' : i,
+      v: _buildMsg(o, opts)
+    }))
+  } else if (_.isObject(obj)) {
+    for (let k in obj) {
+      if (obj[k] !== undefined) {
+        arr.push({ k, v: _buildMsg(obj[k], opts) })
+      }
+    }
+  } else if (obj === undefined || obj === null) {
+    return ''
+  } else {
+    return obj.toString()
+  }
+  // Sort Array
+  arr.sort((a, b) => {
+    let aVal
+    let bVal
+    switch (sortRule) {
+      case 'key':
+        aVal = a.k
+        bVal = b.k
+        break
+      case 'key-alphabet':
+        aVal = a.k.toString()
+        bVal = b.k.toString()
+        break
+      case 'value':
+        aVal = a.v
+        bVal = b.v
+        break
+      case 'kvpair':
+      default:
+        aVal = a.k.toString() + a.v
+        bVal = b.k.toString() + b.v
+        break
+    }
+    if (aVal < bVal) {
+      return -1
+    } else if (aVal === bVal) {
+      return 0
+    } else {
+      return 1
+    }
+  })
+  // Build message
+  return arr.reduce((lastMsg, curr) => {
+    return lastMsg + curr.k + curr.v
+  }, '')
+}
+```
+
+*构建 GET 请求的签名步骤::*
+
+1. 获取当前的时间戳
+2. 将时间戳和其他所有请求参数按字母排序生成一个字符串，字符串像下面这样:
+</br>
+```
+timestamp1557913602438
+```
+3. 使用 sha3 keccak256 编码上面的字符串
+4. 使用私钥通过 ecdsa 签名上面编码好的字符串
+5. 将签名结果的 r 和 s 进行 base64 编码后放入请求参数 sigR 和 sigS 中，时间戳放入 timestamp 中，假设私钥(hex编码)为 1cc64d8767ff6fe618a7794d1e16cced03ab35715d58d48029de87b475abef85 ，那么最终的 sigR 和 sigS 为
+</br>
+```
+sigR = '2vS/6a+4+X0wyDyqAw5gTcLS02cCvH+CsSDIOsStPvc='
+sigS = 'S7TIyw5oYkoBUC0mBUIHxabMU4slREcMAMYo74ZO2wM='
+```
+
+*构建 POST/PUT 请求的签名步骤:*
+
+1. 获取当前的时间戳
+2. 将body中的所有请求参数和时间戳按字母排序生成一个字符串（右侧是js的示例代码），以交换币种接口为例（{sequence: 'abcd', from: 'walletwovldjmmmqj2m0n9', to: 'walletp2q8yjerrr6owxmr', fromAssetID: 1, fromAmount: '123', toAssetID: 2, toAmount: '321', note: 'test sig', timestamp: 1557913602438}），字符串像下面这样:
+</br>
+```
+fromwalletwovldjmmmqj2m0n9fromAmount123fromAssetID1notetest sigsequenceabcdtimestamp1557913602438towalletp2q8yjerrr6owxmrtoAmount321toAssetID2
+```
+3. 使用 sha3 keccak256 编码上面的字符串
+4. 使用私钥通过 ecdsa 签名上面编码好的字符串
+5. 将签名结果的 r 和 s 进行 base64 编码后放入请求参数 sig 中，时间戳放入 timestamp 中，假设私钥(hex编码)为 1cc64d8767ff6fe618a7794d1e16cced03ab35715d58d48029de87b475abef85 ，那么最终的 sig 为
+</br>
+```
+sig: {
+  r: 'Il4vOx0mIfQLRwFQt9E4480IsuwyCvPOHvTxWnv+CM0=',
+  s: 'Psdc5NI36LE+R/X6qVvumtjTvo0ufqBBqEBB62FRTh0='
+}
+```
