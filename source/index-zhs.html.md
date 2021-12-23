@@ -1543,7 +1543,7 @@ OPEN | the order is waiting for feeding price
 DONE | the order has been carried out
 TERMINATE | the order has been cancelled
 
-### 获取价格
+### 报价
 
 ```shell
 $ go run cmd/ctl/main.go "appkey" "appsecret" "OTCFeedPrice" "8yxkewovldjmmqj2m0n9pz71" "7739.90" "0320042810120495" 1588151193
@@ -1557,7 +1557,7 @@ data:
 }
 ```
 
-**总结:** 获取价格
+**总结:** 报价
 
 #### HTTP请求 
 `POST /api/v1/otc/orders/{orderID}/price` 
