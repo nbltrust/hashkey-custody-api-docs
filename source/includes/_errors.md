@@ -27,3 +27,5 @@ Error Code | Meaning
 20013 | Transaction Limit -- The request hit the transaction limit of order.
 20014 | AML Closed -- The AML service had been closed.
 20015 | Not In AML Asset List -- The asset isn't supported by AML service.
+20016 | Not Authorization -- The user not authorization.
+20017 | Token expired -- The user token expired. Please refresh.
