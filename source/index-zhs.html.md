@@ -2643,6 +2643,7 @@ status | string | status, DONE
 createdAt | number | timestamp, create time
 
 asset:
+
 值 | 类型 | 描述
 --------- | ------- | ---------
 id | number | the asset id
