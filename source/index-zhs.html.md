@@ -2481,6 +2481,31 @@ id | number | the user id
 name | string | the user name
 
 ## 钱包
+### 获取用户钱包可用币种
+**描述:** 获取所有可用币种
+
+#### HTTP请求 
+`GET /api/v1/business/wallet/assets` 
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userToken | query | 用于验证用户身份 | Yes | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+assets | array | the wallet asset list
+
+asset:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the asset id
+name | string | the asset name
+
 ### 获取用户钱包余额
 **描述:** 获取所有资产余额
 
@@ -2507,6 +2532,7 @@ assetID | number | the asset id
 assetName | string | the asset name
 total | string | the asset total balance
 available | string | the asset available balance
+locked | string | the asset locked balance
 
 ### 锁定用户钱包金额
 **描述:** 锁定特定币种的金额，锁定的部分将从余额的 available 中移除
@@ -2551,7 +2577,7 @@ total | string | the asset total balance
 available | string | the asset available balance
 
 ### 交换币种
-**描述:** 在用户钱包间交换币种，将一个币种从源钱包余额的 locked 划转到目标钱包余额的 available，同时将另一个币种从目标钱包余额的 locked 划转到源钱包余额的 available，交换成功后会在源钱包和目标钱包都生成一笔转出订单和一笔转入订单
+**描述:** 在用户钱包间交换币种，将一个币种从源钱包余额的 locked 划转到目标钱包余额的 available，同时将另一个币种从目标钱包余额的 locked 划转到源钱包余额的 available，交换成功后会在源钱包和目标钱包都生成一笔交换订单
 
 #### HTTP请求 
 `POST /api/v1/business/swap`
@@ -2564,7 +2590,7 @@ available | string | the asset available balance
 | from | body | from user token | Yes | string |
 | fromAssetID | body | from asset id | Yes | number |
 | fromAmount | body | from asset amount | Yes | string |
-| to | body | to user token | Yes | string |
+| to | body | to user id | Yes | number |
 | toAssetID | body | to asset id | Yes | number |
 | toAmount | body | to asset amount | Yes | string |
 | note | body | note | No | string |
@@ -2596,19 +2622,31 @@ id | number | the swap id
 orders | array | the wallet order list
 totalCount | number | order total count
 
-orders:
+order:
 
 值 | 类型 | 描述
 --------- | ------- | ---------
 id | number | the order id
-assetID | number | the asset id
-assetName | string | the asset name
-type | string | the order type, TRANSFER_IN/TRANSFER_OUT
-bizType | string | the order bizType, SWAP
-bizID | number | the order business ID, e.g. swap id for the SWAP order
-amount | string | the order amount
+type | string | the order type, SWAP
+detail | object | the order detail
+
+detail:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+inAsset | object | the asset received
+inAmount | string | the order amount received
+outAsset | object | the asset sent
+outAmount | string | the order amount sent
+sequence | string | the order sequence
 status | string | status, DONE
 createdAt | number | timestamp, create time
+
+asset:
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the asset id
+name | string | the asset name
 
 # 回调
 
