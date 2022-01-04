@@ -2859,27 +2859,27 @@ function _buildMsg (obj, opts = {}) {
 *构建 GET 请求的签名步骤::*
 
 1. 获取当前的时间戳
-2. 将时间戳和其他所有请求参数按字母排序生成一个字符串，字符串像下面这样:
+2. 将时间戳和其他所有请求参数按字母排序，然后与 HTTP METHOD、URL PATH 结合生成一个字符串，字符串像下面这样:
 </br>
 ```
-timestamp1557913602438
+GET/api/v1/business/clienttimestamp1557913602438userTokeneyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjEsIlRUTCI6MTAwMDAwMCwiVHlwZSI6IkxPR0lOIiwiQ2xpZW50VHlwZSI6IldFQiIsImV4cCI6MTc5ODI1NzAyMH0.EBOwhKrFbLvxq7IjD1NSHhX9NHZeYFlBn8wIbdlfP7k
 ```
 3. 使用 sha3 keccak256 编码上面的字符串
 4. 使用私钥通过 ecdsa 签名上面编码好的字符串
 5. 将签名结果的 r 和 s 进行 base64 编码后放入请求参数 sigR 和 sigS 中，时间戳放入 timestamp 中，假设私钥(hex编码)为 1cc64d8767ff6fe618a7794d1e16cced03ab35715d58d48029de87b475abef85 ，那么最终的 sigR 和 sigS 为
 </br>
 ```
-sigR = '2vS/6a+4+X0wyDyqAw5gTcLS02cCvH+CsSDIOsStPvc='
-sigS = 'S7TIyw5oYkoBUC0mBUIHxabMU4slREcMAMYo74ZO2wM='
+sigR = 'g1jIiJA/m0ndTniseOSMUVI7KDdlmwKRcW66zDeR2b0='
+sigS = 'FivQvME6i4yXps5MRZ3PNiHMS5nyiwdo6fgBuf1rGDk='
 ```
 
 *构建 POST/PUT 请求的签名步骤:*
 
 1. 获取当前的时间戳
-2. 将body中的所有请求参数和时间戳按字母排序生成一个字符串（右侧是js的示例代码），以交换币种接口为例（{sequence: 'abcd', from: 'walletwovldjmmmqj2m0n9', to: 'walletp2q8yjerrr6owxmr', fromAssetID: 1, fromAmount: '123', toAssetID: 2, toAmount: '321', note: 'test sig', timestamp: 1557913602438}），字符串像下面这样:
+2. 将body中的所有请求参数和时间戳按字母排序，然后与 HTTP METHOD、URL PATH 结合生成一个字符串（右侧是js的示例代码），以交换币种接口为例（{sequence: 'abcd', from: 'walletwovldjmmmqj2m0n9', to: 'walletp2q8yjerrr6owxmr', fromAssetID: 1, fromAmount: '123', toAssetID: 2, toAmount: '321', note: 'test sig', timestamp: 1557913602438}），字符串像下面这样:
 </br>
 ```
-fromwalletwovldjmmmqj2m0n9fromAmount123fromAssetID1notetest sigsequenceabcdtimestamp1557913602438towalletp2q8yjerrr6owxmrtoAmount321toAssetID2
+POST/api/v1/business/swapfromwalletwovldjmmmqj2m0n9fromAmount123fromAssetID1notetest sigsequenceabcdtimestamp1557913602438towalletp2q8yjerrr6owxmrtoAmount321toAssetID2
 ```
 3. 使用 sha3 keccak256 编码上面的字符串
 4. 使用私钥通过 ecdsa 签名上面编码好的字符串
@@ -2887,7 +2887,7 @@ fromwalletwovldjmmmqj2m0n9fromAmount123fromAssetID1notetest sigsequenceabcdtimes
 </br>
 ```
 sig: {
-  r: 'Il4vOx0mIfQLRwFQt9E4480IsuwyCvPOHvTxWnv+CM0=',
-  s: 'Psdc5NI36LE+R/X6qVvumtjTvo0ufqBBqEBB62FRTh0='
+  r: '9b38kLb+x7SFhYGoevUUgON5BAa+RqiSvcH8Dfzif8w=',
+  s: 'HGBOPGy6z5arDEEnZVYLykUyd0Kn1GzhX4suZXHaW38='
 }
 ```
