@@ -2610,6 +2610,7 @@ id | number | the swap id
 **参数**
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
 | cmd | body | the command list | Yes | array |
 
 cmd object:
