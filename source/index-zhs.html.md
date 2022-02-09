@@ -2441,7 +2441,7 @@ s | string |
 
 ## 用户
 ### 更新 token
-**描述:** 用户授权合作方后跳转至合作方页面，合作方会从 url 获得 token ，用来在其他接口中标识用户，出于安全原因 token 仅在短时间内有效（不超过2小时），过期后需要通过此接口更新；也可在需要旧 token 失效时调用此接口，获取到新 token 后旧 token 失效，不可再调用此接口；注意旧的 token 如果已过期调此接口时还需要传入用户的 Google 二次验证码 otpCode ，若 token 遗失需要用户重新授权
+**描述:** 用户授权合作方后跳转至合作方页面，合作方会从 url 获得 token ，用来在其他需要用户授权的接口中标识用户，出于安全原因 token 仅在短时间内有效（不超过2小时），过期后需要通过此接口更新；也可在需要旧 token 失效时调用此接口，获取到新 token 后旧 token 失效；注意旧的 token 如果已过期调此接口时还需要传入用户的 Google 二次验证码 otpCode ，若 token 遗失需要用户重新授权
 
 #### HTTP请求 
 `PUT /api/v1/business/client/token`
@@ -2491,7 +2491,7 @@ name | string | the user name
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userToken | query | 用于验证用户身份 | Yes | string |
+| userID | query | 用于标识用户身份 | Yes | number |
 
 **响应结果**
 
@@ -2516,7 +2516,8 @@ name | string | the asset name
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userToken | query | 用于验证用户身份 | Yes | string |
+| userID | query | 用于标识用户身份 | Yes | number |
+| assetID | query | 筛选某个资产 | No | number |
 
 **响应结果**
 
@@ -2559,13 +2560,13 @@ available | string | the asset available balance
 **描述:** 解锁特定币种的金额，解锁的部分将回到余额的 available 中
 
 #### HTTP请求 
-`PUT /api/v1/business/balance/lock`
+`PUT /api/v1/business/balance/unlock`
 
 **参数**
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userToken | body | 用于验证用户身份 | Yes | string |
+| userID | body | 用于标识用户身份 | Yes | number |
 | assetID | body | asset id | Yes | number |
 | amount | body | unlock amount | Yes | string |
 
@@ -2577,7 +2578,7 @@ total | string | the asset total balance
 available | string | the asset available balance
 
 ### 交换币种
-**描述:** 在用户钱包间交换币种，将一个币种从源钱包余额的 locked 划转到目标钱包余额的 available，同时将另一个币种从目标钱包余额的 locked 划转到源钱包余额的 available，交换成功后会在源钱包和目标钱包都生成一笔交换订单
+**描述:** 与合作方官方钱包交换币种，将一个币种从源钱包余额的 locked 划转到官方钱包余额的 available，同时将另一个币种从官方钱包余额的 available 划转到源钱包余额的 available 。 合作方官方钱包需要在创建业务时配置到系统里
 
 #### HTTP请求 
 `POST /api/v1/business/swap`
@@ -2587,12 +2588,11 @@ available | string | the asset available balance
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
 | sequence | body | 此次交换的唯一标识，防止重复请求 | Yes | string |
-| from | body | from user token | Yes | string |
+| from | body | from user id | Yes | string |
 | fromAssetID | body | from asset id | Yes | number |
 | fromAmount | body | from asset amount | Yes | string |
-| to | body | to user id | Yes | number |
-| toAssetID | body | to asset id | Yes | number |
-| toAmount | body | to asset amount | Yes | string |
+| officialAssetID | body | official asset id | Yes | number |
+| officialAmount | body | official asset amount | Yes | string |
 | note | body | note | No | string |
 
 **响应结果**
@@ -2601,8 +2601,33 @@ available | string | the asset available balance
 --------- | ------- | ---------
 id | number | the swap id
 
-### 获取用户钱包订单列表
-**描述:** 获取订单列表
+### 批量操作
+**描述:** 将多个 swap 和 unlock 一起执行，保证事务性
+
+#### HTTP请求 
+`POST /api/v1/business/batch`
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| cmd | body | the command list | Yes | array |
+
+cmd object:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+name | string | the command name, swap/unlock
+args | object | the command arguments, same as request body in the single request
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+errorIndex | number | the index of failed cmd in the array, get -1 if no errors
+successResponse | array | the responses, get empty array if error occurred
+
+### 获取用户钱包交易记录
+**描述:** 获取交易记录
 
 #### HTTP请求 
 `GET /api/v1/business/orders` 
@@ -2611,7 +2636,7 @@ id | number | the swap id
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userToken | query | 用于验证用户身份 | Yes | string |
+| userID | query | 用于标识用户身份 | Yes | number |
 | page | query | page, 默认1 | No | number |
 | amount | query | item count on this page, 默认10 | No | number |
 
