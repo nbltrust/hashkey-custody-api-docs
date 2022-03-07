@@ -2440,27 +2440,6 @@ s | string |
 
 
 ## 用户
-### 更新 token
-**描述:** 用户授权合作方后跳转至合作方页面，合作方会从 url 获得 token ，用来在其他需要用户授权的接口中标识用户，出于安全原因 token 仅在短时间内有效（不超过2小时），过期后需要通过此接口更新；也可在需要旧 token 失效时调用此接口，获取到新 token 后旧 token 失效；注意旧的 token 如果已过期调此接口时还需要传入用户的 Google 二次验证码 otpCode ，若 token 遗失需要用户重新授权
-
-#### HTTP请求 
-`PUT /api/v1/business/client/token`
-
-**参数**
-
-| 名称 | 位置 | 描述| 是否必需| 类型 |
-| ---- | ---------- | ----------- | -------- | ---- |
-| token | body | 旧的 token | Yes | string |
-| ttl | body | 新 token 的有效期（秒） | Yes | number |
-| otpCode | body | 用户的 Google Authentication Code | 旧的 token 过期时必需 | string |
-
-**响应结果**
-
-值 | 类型 | 描述
---------- | ------- | ---------
-token | string | 新的 token
-exipredAt | number | token 过期时间
-
 ### 获取用户的基本信息
 **描述:** 获取用户的基本信息
 
@@ -2471,7 +2450,7 @@ exipredAt | number | token 过期时间
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userToken | query | 用于验证用户身份 | Yes | string |
+| userID | query | 用于标识用户身份 | Yes | number |
 
 **响应结果**
 
@@ -2545,7 +2524,7 @@ locked | string | the asset locked balance
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userToken | body | 用于验证用户身份 | Yes | string |
+| userID | body | 用于标识用户身份 | Yes | number |
 | assetID | body | asset id | Yes | number |
 | amount | body | lock amount | Yes | string |
 
@@ -2888,7 +2867,7 @@ function _buildMsg (obj, opts = {}) {
 2. 将时间戳和其他所有请求参数按字母排序，然后与 HTTP METHOD、URL PATH 结合生成一个字符串，字符串像下面这样:
 </br>
 ```
-GET/api/v1/business/clienttimestamp1557913602438userTokeneyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjEsIlRUTCI6MTAwMDAwMCwiVHlwZSI6IkxPR0lOIiwiQ2xpZW50VHlwZSI6IldFQiIsImV4cCI6MTc5ODI1NzAyMH0.EBOwhKrFbLvxq7IjD1NSHhX9NHZeYFlBn8wIbdlfP7k
+GET/api/v1/business/clienttimestamp1557913602438userID1
 ```
 3. 使用 sha3 keccak256 编码上面的字符串
 4. 使用私钥通过 ecdsa 签名上面编码好的字符串
