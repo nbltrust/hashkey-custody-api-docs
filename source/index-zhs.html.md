@@ -2514,6 +2514,28 @@ total | string | the asset total balance
 available | string | the asset available balance
 locked | string | the asset locked balance
 
+### 更新用户钱包余额
+**描述:** 更新特定币种的余额 available，用于记录余额因充值/提现产生的变动
+
+#### HTTP请求
+`POST /api/v1/business/balance/settle`
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| sequence | body | 此次结算的唯一标识，防止重复请求 | Yes | string |
+| userID | body | 用于标识用户身份 | Yes | number |
+| type | body | 类型，WITHDRAW/DEPOSIT | Yes | string |
+| assetID | body | asset id | Yes | number |
+| amount | body | settle amount | Yes | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the settle order id
+
 ### 锁定用户钱包金额
 **描述:** 锁定特定币种的金额，锁定的部分将从余额的 available 中移除
 
@@ -2578,7 +2600,7 @@ available | string | the asset available balance
 
 值 | 类型 | 描述
 --------- | ------- | ---------
-id | number | the swap id
+id | number | the swap order id
 
 ### 批量操作
 **描述:** 将多个 swap 和 unlock 一起执行，保证事务性
@@ -2632,7 +2654,7 @@ order:
 值 | 类型 | 描述
 --------- | ------- | ---------
 id | number | the order id
-type | string | the order type, SWAP
+type | string | the order type, SWAP/WITHDRAW/DEPOSIT
 detail | object | the order detail
 
 detail:
