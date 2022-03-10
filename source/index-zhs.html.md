@@ -2546,6 +2546,7 @@ id | number | the settle order id
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
+| sequence | body | 此次操作的唯一标识，防止重复请求 | Yes | string |
 | userID | body | 用于标识用户身份 | Yes | number |
 | assetID | body | asset id | Yes | number |
 | amount | body | lock amount | Yes | string |
@@ -2567,6 +2568,7 @@ available | string | the asset available balance
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
+| sequence | body | 此次操作的唯一标识，防止重复请求 | Yes | string |
 | userID | body | 用于标识用户身份 | Yes | number |
 | assetID | body | asset id | Yes | number |
 | amount | body | unlock amount | Yes | string |
@@ -2577,6 +2579,30 @@ available | string | the asset available balance
 --------- | ------- | ---------
 total | string | the asset total balance
 available | string | the asset available balance
+
+### 划转
+**描述:** 与合作方官方钱包之间进行划转，将一个币种从一方钱包余额的 available 划转到另一方钱包余额的 available 。 合作方官方钱包需要在创建业务时配置到系统里
+
+#### HTTP请求 
+`POST /api/v1/business/transfer`
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| sequence | body | 此次操作的唯一标识，防止重复请求 | Yes | string |
+| assetID | body | asset id | Yes | number |
+| amount | body | asset amount | Yes | string |
+| from | body | from user id，合作方官方钱包为0 | Yes | number |
+| to | body | to user id，合作方官方钱包为0 | Yes | number |
+| note | body | note | No | string |
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the transfer id
+
 
 ### 交换币种
 **描述:** 与合作方官方钱包交换币种，将一个币种从源钱包余额的 locked 划转到官方钱包余额的 available，同时将另一个币种从官方钱包余额的 available 划转到源钱包余额的 available 。 合作方官方钱包需要在创建业务时配置到系统里
@@ -2589,7 +2615,7 @@ available | string | the asset available balance
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
 | sequence | body | 此次交换的唯一标识，防止重复请求 | Yes | string |
-| from | body | from user id | Yes | string |
+| from | body | from user id | Yes | number |
 | fromAssetID | body | from asset id | Yes | number |
 | fromAmount | body | from asset amount | Yes | string |
 | officialAssetID | body | official asset id | Yes | number |
@@ -2600,7 +2626,7 @@ available | string | the asset available balance
 
 值 | 类型 | 描述
 --------- | ------- | ---------
-id | number | the swap order id
+id | number | the swap id
 
 ### 批量操作
 **描述:** 将多个 swap 和 unlock 一起执行，保证事务性
@@ -2628,53 +2654,26 @@ args | object | the command arguments, same as request body in the single reques
 errorIndex | number | the index of failed cmd in the array, get -1 if no errors
 successResponse | array | the responses, get empty array if error occurred
 
-### 获取用户钱包交易记录
-**描述:** 获取交易记录
+### 查询交易记录
+**描述:** 查询交易记录
 
 #### HTTP请求 
-`GET /api/v1/business/orders` 
+`GET /api/v1/business/order/sequence/{sequenceID}` 
 
 **参数**
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userID | query | 用于标识用户身份 | Yes | number |
-| page | query | page, 默认1 | No | number |
-| amount | query | item count on this page, 默认10 | No | number |
+| sequence | query | order发起者设置的唯一标识 | Yes | string |
 
 **响应结果**
 
 值 | 类型 | 描述
 --------- | ------- | ---------
-orders | array | the wallet order list
-totalCount | number | order total count
-
-order:
-
-值 | 类型 | 描述
---------- | ------- | ---------
 id | number | the order id
-type | string | the order type, SWAP/WITHDRAW/DEPOSIT
-detail | object | the order detail
-
-detail:
-
-值 | 类型 | 描述
---------- | ------- | ---------
-inAsset | object | the asset received
-inAmount | string | the order amount received
-outAsset | object | the asset sent
-outAmount | string | the order amount sent
-sequence | string | the order sequence
+type | string | the order type, SWAP/LOCK/UNLOCK/TRANSFER/WITHDRAW/DEPOSIT
 status | string | status, DONE
-createdAt | number | timestamp, create time
-
-asset:
-
-值 | 类型 | 描述
---------- | ------- | ---------
-id | number | the asset id
-name | string | the asset name
+detail | object | the order detail, order 创建的参数
 
 # 回调
 
