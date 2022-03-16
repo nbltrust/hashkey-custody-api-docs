@@ -2890,7 +2890,7 @@ function _buildMsg (obj, opts = {}) {
 ```
 GET/api/v1/business/clienttimestamp1557913602438userID1
 ```
-3. 使用 sha3 keccak256 编码上面的字符串
+3. 使用 sha3 256 编码上面的字符串
 4. 使用私钥通过 ecdsa 签名上面编码好的字符串
 5. 将签名结果的 r 和 s 进行 base64 编码后放入请求参数 sigR 和 sigS 中，时间戳放入 timestamp 中，假设私钥(hex编码)为 1cc64d8767ff6fe618a7794d1e16cced03ab35715d58d48029de87b475abef85 ，那么最终的 sigR 和 sigS 为
 </br>
