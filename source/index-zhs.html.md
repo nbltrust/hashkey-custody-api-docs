@@ -2458,19 +2458,21 @@ s | string |
 --------- | ------- | ---------
 id | number | the user id
 name | string | the user name
+email | string | the user email
+phone | string | the user phone
+kycLevel | int | the kyc level, 1/2
 
 ## 钱包
-### 获取用户钱包可用币种
+### 获取业务钱包可用币种
 **描述:** 获取所有可用币种
 
 #### HTTP请求 
-`GET /api/v1/business/wallet/assets` 
+`GET /api/v1/business/assets` 
 
 **参数**
 
 | 名称 | 位置 | 描述| 是否必需| 类型 |
 | ---- | ---------- | ----------- | -------- | ---- |
-| userID | query | 用于标识用户身份 | Yes | number |
 
 **响应结果**
 
