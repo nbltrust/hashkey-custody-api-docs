@@ -2413,7 +2413,7 @@ createdAt| number |  unix timestamp, seconds
 # 业务 API
 
 ```go
-business := sdk.NewBusinessWithAddr(apiAddr, key, secret, publicKeyFilePath)
+business := sdk.NewBusinessWithAddr(apiAddr, key, privateKeyFilePath, publicKeyFilePath)
 ```
 
 业务 API 仅对业务合作方开放。API 权限通过 [ECC signature](#ecc) 认证，合作方生成密钥，然后将公钥配置到系统里方可使用；用户数据权限通过用户授权合作方后获得的 token 验证。
