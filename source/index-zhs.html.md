@@ -2411,6 +2411,11 @@ remark| string |  record remark
 createdAt| number |  unix timestamp, seconds
 
 # 业务 API
+
+```go
+business := sdk.NewBusinessWithAddr(apiAddr, key, secret, publicKeyFilePath)
+```
+
 业务 API 仅对业务合作方开放。API 权限通过 [ECC signature](#ecc) 认证，合作方生成密钥，然后将公钥配置到系统里方可使用；用户数据权限通过用户授权合作方后获得的 token 验证。
 
 ## 公共参数
@@ -2464,6 +2469,28 @@ kycLevel | int | the kyc level, 1/2
 
 ## 钱包
 ### 获取业务钱包可用币种
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessAssetsGet -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "assets": [
+    {
+      "decimal": 18,
+      "id": 1,
+      "name": "ETH"
+    }
+  ]
+}
+```
+
+```go
+	result, _ = business.AssetsGet()
+```
+
 **描述:** 获取所有可用币种
 
 #### HTTP请求 
@@ -2486,6 +2513,7 @@ asset:
 --------- | ------- | ---------
 id | number | the asset id
 name | string | the asset name
+decimal | number | the asset decimal
 
 ### 获取用户钱包余额
 **描述:** 获取所有资产余额
