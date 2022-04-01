@@ -2446,6 +2446,26 @@ s | string |
 
 ## 用户
 ### 获取用户的基本信息
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessClientGet 1 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "email": "test@t.com",
+  "id": 1,
+  "name": "test@t.com",
+  "phone": "",
+  "kycLevel": 2
+}
+```
+
+```go
+	result, _ = business.ClientGet()
+```
+
 **描述:** 获取用户的基本信息
 
 #### HTTP请求 
@@ -2516,6 +2536,30 @@ name | string | the asset name
 decimal | number | the asset decimal
 
 ### 获取用户钱包余额
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessWalletBalancesGet 1 0 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "balances": [
+    {
+      "assetID": 1,
+      "assetName": "ETH",
+      "available": "0.000000000000000000",
+      "locked": "0.000000000000000000",
+      "total": "0.000000000000000000"
+    }
+  ]
+}
+```
+
+```go
+	result, _ = business.WalletBalancesGet()
+```
+
 **描述:** 获取所有资产余额
 
 #### HTTP请求 
