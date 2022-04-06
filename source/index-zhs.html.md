@@ -2703,7 +2703,7 @@ id | number | the transfer id
 id | number | the swap id
 
 ### 批量操作
-**描述:** 将多个 swap 和 unlock 一起执行，保证事务性
+**描述:** 将多个 swap, lock 和 unlock 一起执行，保证事务性
 
 #### HTTP请求 
 `POST /api/v1/business/batch`
@@ -2732,7 +2732,7 @@ successResponse | array | the responses, get empty array if error occurred
 **描述:** 查询交易记录
 
 #### HTTP请求 
-`GET /api/v1/business/order/sequence/{sequenceID}` 
+`GET /api/v1/business/order/sequence/{sequence}` 
 
 **参数**
 
