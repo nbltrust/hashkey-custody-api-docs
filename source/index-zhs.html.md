@@ -2718,7 +2718,7 @@ cmd object:
 
 值 | 类型 | 描述
 --------- | ------- | ---------
-name | string | the command name, swap/unlock
+name | string | the command name, swap/lock/unlock
 args | object | the command arguments, same as request body in the single request
 
 **响应结果**
