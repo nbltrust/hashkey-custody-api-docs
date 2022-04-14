@@ -2689,6 +2689,22 @@ total | string | the asset total balance
 available | string | the asset available balance
 
 ### 划转
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessTransfer a16 1 0.1 3 0 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "id": 28
+}
+```
+
+```go
+	result, _ = business.Transfer(from, to, assetID, sequence, amount, note)
+```
+
 **描述:** 与合作方官方钱包之间进行划转，将一个币种从一方钱包余额的 available 划转到另一方钱包余额的 available 。 合作方官方钱包需要在创建业务时配置到系统里
 
 #### HTTP请求 
