@@ -2611,6 +2611,23 @@ locked | string | the asset locked balance
 id | number | the settle order id
 
 ### 锁定用户钱包金额
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessBalanceLock a6 3 1 0.1 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "available": "0.800000000000000000",
+  "total": "0.900000000000000000"
+}
+```
+
+```go
+	result, _ = business.BalanceLock(userID, assetID, sequence, amount)
+```
+
 **描述:** 锁定特定币种的金额，锁定的部分将从余额的 available 中移除
 
 #### HTTP请求 
@@ -2633,6 +2650,23 @@ total | string | the asset total balance
 available | string | the asset available balance
 
 ### 解锁用户钱包金额
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessBalanceUnlock a7 3 1 0.05 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "available": "0.850000000000000000",
+  "total": "0.900000000000000000"
+}
+```
+
+```go
+	result, _ = business.BalanceUnlock(userID, assetID, sequence, amount)
+```
+
 **描述:** 解锁特定币种的金额，解锁的部分将回到余额的 available 中
 
 #### HTTP请求 
@@ -2679,6 +2713,22 @@ id | number | the transfer id
 
 
 ### 交换币种
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessSwap a8 3 1 0.05 2 0.3 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "id": 18
+}
+```
+
+```go
+	result, _ = business.Swap(from, fromAssetID, officialAssetID, sequence, fromAmount, officialAmount, note)
+```
+
 **描述:** 与合作方官方钱包交换币种，将一个币种从源钱包余额的 locked 划转到官方钱包余额的 available，同时将另一个币种从官方钱包余额的 available 划转到源钱包余额的 available 。 合作方官方钱包需要在创建业务时配置到系统里
 
 #### HTTP请求 
@@ -2703,6 +2753,28 @@ id | number | the transfer id
 id | number | the swap id
 
 ### 批量操作
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessBatch '[{"name": "lock", "args": {"sequence": "a9", "userID": 3, "assetID": 1, "amount": "0.1"}}]' -p pub_xpert.pem
+code: 0
+message:
+sign: true
+data:
+{
+  "errorIndex": 0,
+  "successResponse": [
+    {
+      "available": "0.750000000000000000",
+      "total": "0.850000000000000000"
+    }
+  ]
+}
+```
+
+```go
+	result, _ = business.Batch(cmd)
+```
+
 **描述:** 将多个 swap, lock 和 unlock 一起执行，保证事务性
 
 #### HTTP请求 
@@ -2729,6 +2801,34 @@ errorIndex | number | the index of failed cmd in the array, get -1 if no errors
 successResponse | array | the responses, get empty array if error occurred
 
 ### 查询交易记录
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessOrderGet a8 -p pub_xpert.pem
+code: 0
+message:
+sign: true
+data:
+{
+  "detail": {
+    "from": 3,
+    "fromAmount": "0.05",
+    "fromAssetID": 1,
+    "note": "",
+    "officialAmount": "0.3",
+    "officialAssetID": 2,
+    "officialWalletID": 3,
+    "sequence": "a8"
+  },
+  "id": 18,
+  "status": "DONE",
+  "type": "SWAP"
+}
+```
+
+```go
+	result, _ = business.OrderGetBySequence(sequence)
+```
+
 **描述:** 查询交易记录
 
 #### HTTP请求 
