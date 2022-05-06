@@ -2514,6 +2514,7 @@ kycLevel | int | the kyc level, 1/2
 | userID | query | 用于标识用户身份 | Yes | number |
 
 **响应结果**
+
 值 | 类型 | 描述
 --------- | ------- | ---------
 cards | array | 用户的银行卡列表
@@ -2669,8 +2670,8 @@ total | string | the asset total balance
 available | string | the asset available balance
 locked | string | the asset locked balance
 
-### 更新用户钱包余额
-**描述:** 更新特定币种的余额 available，用于记录余额因充值/提现产生的变动
+### 更新用户钱包内部资产的余额
+**描述:** 仅能更新内部 token 的余额 available，用于记录余额因充值/提现产生的变动
 
 #### HTTP请求
 `POST /api/v1/business/balance/settle`
@@ -2986,7 +2987,9 @@ createdAt | number | unix timestamp, seconds
 ## 推送
 ### 交易记录
 **描述:** 未通过业务 api 触发的交易完成后推送
+
 **内容**
+
 值 | 类型 | 描述
 --------- | ------- | ---------
 id | number | 交易 id
@@ -2997,7 +3000,9 @@ createdAt | number | unix timestamp, seconds
 
 ### 用户通过 KYC
 **描述:** 用户通过 KYC 后推送（任何一个 level 通过都会发）
+
 **内容**
+
 值 | 类型 | 描述
 --------- | ------- | ---------
 id | number | the user id
