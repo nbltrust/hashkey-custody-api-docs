@@ -2443,6 +2443,19 @@ sig:
 r | string |
 s | string |
 
+对于响应结果及推送信息：
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+| sign | object | ECC signature，可用于验证发起方身份
+| data | object | 响应结果或推送信息的内容，详见下方具体的接口文档
+
+sign:
+
+值 | 类型 |
+--------- | ------- |
+r | string |
+s | string |
 
 ## 用户
 ### 获取用户的基本信息
@@ -2478,6 +2491,74 @@ data:
 | userID | query | 用于标识用户身份 | Yes | number |
 
 **响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the user id
+name | string | the user name
+email | string | the user email
+phone | string | the user phone
+kycLevel | int | the kyc level, 1/2
+
+### 获取用户的银行卡信息
+
+**描述:** 获取用户已通过审核的银行卡信息
+
+#### HTTP请求 
+`GET /api/v1/business/client/cards` 
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userID | query | 用于标识用户身份 | Yes | number |
+
+**响应结果**
+值 | 类型 | 描述
+--------- | ------- | ---------
+cards | array | 用户的银行卡列表
+
+card:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | string | id
+accountNumber | string | 银行卡号
+content | object | 卡片的详细信息
+
+content:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+accountName | string | accountName
+accountAddress | string | accountAddress
+bank | string | bank
+bankAddress | string | bankAddress
+routingNumber | string | routingNumber
+swift | string | swift code
+
+### 获取所有用户 KYC 信息
+
+**描述:** 获取所有用户信息
+
+#### HTTP请求 
+`GET /api/v1/business/clients` 
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| page | query | page, e.g. 1 | No | number |
+| amount | query | 此页条目数 | No | number |
+
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+clients | array | the client list
+
+client:
 
 值 | 类型 | 描述
 --------- | ------- | ---------
@@ -2816,7 +2897,7 @@ args | object | the command arguments, same as request body in the single reques
 errorIndex | number | the index of failed cmd in the array, get -1 if no errors
 successResponse | array | the responses, get empty array if error occurred
 
-### 查询交易记录
+### 查询业务订单信息
 
 ```shell
 go run cmd/ctl/main.go bcts pri_bcts.pem BusinessOrderGet a8 -p pub_xpert.pem
@@ -2845,7 +2926,7 @@ data:
 	result, _ = business.OrderGetBySequence(sequence)
 ```
 
-**描述:** 查询交易记录
+**描述:** 查询业务订单信息
 
 #### HTTP请求 
 `GET /api/v1/business/order/sequence/{sequence}` 
@@ -2862,8 +2943,68 @@ data:
 --------- | ------- | ---------
 id | number | the order id
 type | string | the order type, SWAP/LOCK/UNLOCK/TRANSFER/WITHDRAW/DEPOSIT
-status | string | status, DONE
+status | string | status, DONE/FAILED
 detail | object | the order detail, order 创建的参数
+
+### 查询所有交易记录
+
+**描述:** 查询所有交易记录
+
+#### HTTP请求 
+`GET /api/v1/business/transactions` 
+
+**参数**
+
+| 名称 | 位置 | 描述| 是否必需| 类型 |
+| ---- | ---------- | ----------- | -------- | ---- |
+| userID | query | 用于标识用户身份 | Yes | number |
+| type | query | 筛选某个类型 | No | string |
+| isBusiness | query | 筛选通过/未通过业务 api 触发的交易 | No | bool |
+| status | query | 筛选状态 | No | string |
+| page | query | page, e.g. 1 | No | number |
+| amount | query | 此页条目数 | No | number |
+
+
+**响应结果**
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+transactions | array | the wallet transaction list
+
+transaction:
+
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | 交易 id
+type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/LOCK/UNLOCK/WITHDRAW/DEPOSIT/CREDIT
+assetName | string | 交易币种
+isBusiness | bool | 是否是通过/未通过业务 api 触发的交易
+amount | string | 交易数量
+status | string | status, DONE/FAILED
+createdAt | number | unix timestamp, seconds
+
+## 推送
+### 交易记录
+**描述:** 未通过业务 api 触发的交易完成后推送
+**内容**
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | 交易 id
+type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/CREDIT
+assetName | string | 交易币种
+amount | string | 交易数量
+createdAt | number | unix timestamp, seconds
+
+### 用户通过 KYC
+**描述:** 用户通过 KYC 后推送（任何一个 level 通过都会发）
+**内容**
+值 | 类型 | 描述
+--------- | ------- | ---------
+id | number | the user id
+name | string | the user name
+email | string | the user email
+phone | string | the user phone
+kycLevel | int | the kyc level, 1/2
 
 # 回调
 
