@@ -2447,6 +2447,7 @@ s | string |
 
 值 | 类型 | 描述
 --------- | ------- | ---------
+| messageID | string | 推送信息的 id，接收方返回 http code 200 后消息就不会再次推送
 | sign | object | ECC signature，可用于验证发起方身份
 | data | object | 响应结果或推送信息的内容，详见下方具体的接口文档
 
@@ -2684,7 +2685,7 @@ locked | string | the asset locked balance
 | userID | body | 用于标识用户身份 | Yes | number |
 | type | body | 类型，WITHDRAW/DEPOSIT | Yes | string |
 | assetID | body | asset id | Yes | number |
-| amount | body | settle amount | Yes | string |
+| amount | body | 变更的数量，对于 WITHDRAW 是提现的数量，对于 DEPOSIT 是充值的数量 | Yes | string |
 
 **响应结果**
 
@@ -2978,6 +2979,7 @@ transaction:
 --------- | ------- | ---------
 id | number | 交易 id
 type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/LOCK/UNLOCK/WITHDRAW/DEPOSIT/CREDIT
+userID | number | 触发交易的 user id
 assetName | string | 交易币种
 isBusiness | bool | 是否是通过/未通过业务 api 触发的交易
 amount | string | 交易数量
@@ -2994,6 +2996,7 @@ createdAt | number | unix timestamp, seconds
 --------- | ------- | ---------
 id | number | 交易 id
 type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/CREDIT
+userID | number | 触发交易的 user id
 assetName | string | 交易币种
 amount | string | 交易数量
 createdAt | number | unix timestamp, seconds
