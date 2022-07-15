@@ -2448,6 +2448,7 @@ s | string |
 值 | 类型 | 描述
 --------- | ------- | ---------
 | messageID | string | 推送信息的 id，接收方返回 http code 200 后消息就不会再次推送
+| messageType | string | 推送信息的 type，具体值看相关推送消息
 | sign | object | ECC signature，可用于验证发起方身份
 | data | object | 响应结果或推送信息的内容，详见下方具体的接口文档
 
@@ -2988,7 +2989,7 @@ createdAt | number | unix timestamp, seconds
 
 ## 推送
 ### 交易记录
-**描述:** 未通过业务 api 触发的交易完成后推送
+**描述:** messageType = ORDER_END 未通过业务 api 触发的交易完成后推送
 
 **内容**
 
@@ -3002,7 +3003,7 @@ amount | string | 交易数量
 createdAt | number | unix timestamp, seconds
 
 ### 用户通过 KYC
-**描述:** 用户通过 KYC 后推送（任何一个 level 通过都会发）
+**描述:** messageType = KYC_PASS 用户通过 KYC 后推送（任何一个 level 通过都会发）
 
 **内容**
 
