@@ -2979,7 +2979,7 @@ transaction:
 值 | 类型 | 描述
 --------- | ------- | ---------
 id | number | 交易 id
-type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/LOCK/UNLOCK/WITHDRAW/DEPOSIT/CREDIT
+type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/LOCK/UNLOCK/CREDIT
 userID | number | 触发交易的 user id
 assetName | string | 交易币种
 isBusiness | bool | 是否是通过/未通过业务 api 触发的交易
