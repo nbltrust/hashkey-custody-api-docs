@@ -2962,7 +2962,6 @@ detail | object | the order detail, order 创建的参数
 | ---- | ---------- | ----------- | -------- | ---- |
 | userID | query | 用于标识用户身份 | Yes | number |
 | type | query | 筛选某个类型 | No | string |
-| isBusiness | query | 筛选通过/未通过业务 api 触发的交易 | No | bool |
 | status | query | 筛选状态 | No | string |
 | page | query | page, e.g. 1 | No | number |
 | amount | query | 此页条目数 | No | number |
@@ -2982,14 +2981,14 @@ id | number | 交易 id
 type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/LOCK/UNLOCK/CREDIT
 userID | number | 触发交易的 user id
 assetName | string | 交易币种
-isBusiness | bool | 是否是通过/未通过业务 api 触发的交易
+businessKeyName | string | 业务 api 触发交易使用的 key 名称
 amount | string | 交易数量
 status | string | status, DONE/FAILED
 createdAt | number | unix timestamp, seconds
 
 ## 推送
 ### 交易记录
-**描述:** messageType = ORDER_END 未通过业务 api 触发的交易完成后推送
+**描述:** messageType = ORDER_END 未通过业务 api 触发或者通过业务 api 但非当前 key 触发的交易完成后推送
 
 **内容**
 
