@@ -2478,7 +2478,7 @@ data:
 ```
 
 ```go
-	result, _ = business.ClientGet()
+	result, _ = business.ClientGet(userID)
 ```
 
 **描述:** 获取用户的基本信息
@@ -2503,6 +2503,41 @@ phone | string | the user phone
 kycLevel | int | the kyc level, 1/2
 
 ### 获取用户的银行卡信息
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessClientCardsGet 1 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "cards": [
+    {
+      "accountNumber": "7",
+      "content": {
+        "accountAddress": "6",
+        "accountName": "5",
+        "additionalInfo": "8",
+        "bank": "1",
+        "bankAddress": "2",
+        "proof": {
+          "id": "kyc4eq8kz1235jzlk60n9rvpwl7",
+          "mimeType": "image/jpeg",
+          "name": "IMG_4080.JPG",
+          "type": "FILE"
+        },
+        "routingNumber": "4",
+        "swift": "3"
+      },
+      "id": "kycy4xdel2w0vjxm6r9q31onmzk"
+    }
+  ]
+}
+```
+
+```go
+	result, _ = business.ClientCardsGet(userID)
+```
 
 **描述:** 获取用户已通过审核的银行卡信息
 
@@ -2541,6 +2576,37 @@ routingNumber | string | routingNumber
 swift | string | swift code
 
 ### 获取所有用户 KYC 信息
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessClientsGet 1 2 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "accounts": [
+    {
+      "email": "cvs72279@yuoia.com",
+      "id": 590,
+      "kycLevel": 0,
+      "name": "cvs72279@yuoia.com",
+      "phone": ""
+    },
+    {
+      "email": "xfj19159@yuoia.com",
+      "id": 589,
+      "kycLevel": 0,
+      "name": "xfj19159@yuoia.com",
+      "phone": ""
+    }
+  ],
+  "totalAmount": 349
+}
+```
+
+```go
+	result, _ = business.ClientsGet(page, amount)
+```
 
 **描述:** 获取所有用户信息
 
@@ -2618,6 +2684,7 @@ asset:
 id | number | the asset id
 name | string | the asset name
 decimal | number | the asset decimal
+type | string | the asset type, ASSET/TOKEN
 
 ### 获取用户钱包余额
 
@@ -2673,6 +2740,23 @@ available | string | the asset available balance
 locked | string | the asset locked balance
 
 ### 更新用户钱包内部资产的余额
+
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessBalanceSettle DEPOSIT 1 1 test1 1.23 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "available": "0.800000000000000000",
+  "total": "0.900000000000000000"
+}
+```
+
+```go
+	result, _ = business.BalanceSettle(userID, assetID, mType, sequence, amount)
+```
+
 **描述:** 仅能更新内部 token 的余额 available，用于记录余额因充值/提现产生的变动
 
 #### HTTP请求
@@ -2951,6 +3035,43 @@ detail | object | the order detail, order 创建的参数
 
 ### 查询所有交易记录
 
+```shell
+go run cmd/ctl/main.go bcts pri_bcts.pem BusinessTransactionsGet 435 "" "" 1 2 -p pub_xpert.pem
+code: 0
+message: success
+sign: true
+data:
+{
+  "orders": [
+    {
+      "amount": "0.000010000000000000",
+      "assetName": "ETH",
+      "businessKeyName": "hashkey-bcts",
+      "createdAt": 1657450296,
+      "id": "orders7e2zr1o0kjwyrlg84pxwy5vd",
+      "status": "DONE",
+      "type": "TRANSFER_OUT",
+      "userID": 435
+    },
+    {
+      "amount": "0.000010000000000000",
+      "assetName": "ETH",
+      "businessKeyName": "hashkey-bcts",
+      "createdAt": 1657250478,
+      "id": "orders2dlrzovm46vw11gx8n31ypw7",
+      "status": "DONE",
+      "type": "TRANSFER_OUT",
+      "userID": 435
+    }
+  ],
+  "totalAmount": 24
+}
+```
+
+```go
+	result, _ = business.TransactionsGet(userID, mType, status, page, amount)
+```
+
 **描述:** 查询所有交易记录
 
 #### HTTP请求 
@@ -2978,7 +3099,7 @@ transaction:
 值 | 类型 | 描述
 --------- | ------- | ---------
 id | number | 交易 id
-type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/LOCK/UNLOCK/CREDIT
+type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/LOCK/UNLOCK/WITHDRAW/DEPOSIT/CREDIT
 userID | number | 触发交易的 user id
 assetName | string | 交易币种
 businessKeyName | string | 业务 api 触发交易使用的 key 名称
@@ -2987,19 +3108,6 @@ status | string | status, DONE/FAILED
 createdAt | number | unix timestamp, seconds
 
 ## 推送
-### 交易记录
-**描述:** messageType = ORDER_END 未通过业务 api 触发或者通过业务 api 但非当前 key 触发的交易完成后推送
-
-**内容**
-
-值 | 类型 | 描述
---------- | ------- | ---------
-id | number | 交易 id
-type | string | 交易 type, TRANSFER_IN/TRANSFER_OUT/CREDIT
-userID | number | 触发交易的 user id
-assetName | string | 交易币种
-amount | string | 交易数量
-createdAt | number | unix timestamp, seconds
 
 ### 用户通过 KYC
 **描述:** messageType = KYC_PASS 用户通过 KYC 后推送（任何一个 level 通过都会发）
